@@ -23,28 +23,21 @@ namespace MongoDB.Bson.Serialization
     /// </summary>
     public class BsonSerializationContext
     {
-        // private fields
-        private readonly Func<Type, bool> _isDynamicType;
-        private readonly IBsonWriter _writer;
-
         // constructors
         private BsonSerializationContext(
             IBsonWriter writer,
             Func<Type, bool> isDynamicType)
         {
-            _writer = writer;
-            _isDynamicType = isDynamicType;
+            Writer = writer;
+            IsDynamicType = isDynamicType;
         }
 
         // public properties
         /// <summary>
-        /// Gets a function that, when executed, will indicate whether the type 
+        /// Gets a function that, when executed, will indicate whether the type
         /// is a dynamic type.
         /// </summary>
-        public Func<Type, bool> IsDynamicType
-        {
-            get { return _isDynamicType; }
-        }
+        public Func<Type, bool> IsDynamicType { get; }
 
         /// <summary>
         /// Gets the writer.
@@ -52,10 +45,12 @@ namespace MongoDB.Bson.Serialization
         /// <value>
         /// The writer.
         /// </value>
-        public IBsonWriter Writer
-        {
-            get { return _writer; }
-        }
+        public IBsonWriter Writer { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public bool SanitizeBsonValues { get; set; }
 
         // public static methods
         /// <summary>
@@ -88,7 +83,7 @@ namespace MongoDB.Bson.Serialization
         public BsonSerializationContext With(
             Action<Builder> configurator = null)
         {
-            var builder = new Builder(this, _writer);
+            var builder = new Builder(this, Writer);
             if (configurator != null)
             {
                 configurator(builder);
@@ -102,10 +97,6 @@ namespace MongoDB.Bson.Serialization
         /// </summary>
         public class Builder
         {
-            // private fields
-            private Func<Type, bool> _isDynamicType;
-            private IBsonWriter _writer;
-
             // constructors
             internal Builder(BsonSerializationContext other, IBsonWriter writer)
             {
@@ -114,14 +105,14 @@ namespace MongoDB.Bson.Serialization
                     throw new ArgumentNullException("writer");
                 }
 
-                _writer = writer;
+                Writer = writer;
                 if (other != null)
                 {
-                    _isDynamicType = other._isDynamicType;
+                    IsDynamicType = other.IsDynamicType;
                 }
                 else
                 {
-                    _isDynamicType = t =>
+                    IsDynamicType = t =>
                         (BsonDefaults.DynamicArraySerializer != null && t == BsonDefaults.DynamicArraySerializer.ValueType) ||
                         (BsonDefaults.DynamicDocumentSerializer != null && t == BsonDefaults.DynamicDocumentSerializer.ValueType);
                 }
@@ -131,11 +122,7 @@ namespace MongoDB.Bson.Serialization
             /// <summary>
             /// Gets or sets the function used to determine if a type is a dynamic type.
             /// </summary>
-            public Func<Type, bool> IsDynamicType
-            {
-                get { return _isDynamicType; }
-                set { _isDynamicType = value; }
-            }
+            public Func<Type, bool> IsDynamicType { get; set; }
 
             /// <summary>
             /// Gets the writer.
@@ -143,10 +130,7 @@ namespace MongoDB.Bson.Serialization
             /// <value>
             /// The writer.
             /// </value>
-            public IBsonWriter Writer
-            {
-                get { return _writer; }
-            }
+            public IBsonWriter Writer { get; }
 
             // public methods
             /// <summary>
@@ -155,7 +139,7 @@ namespace MongoDB.Bson.Serialization
             /// <returns>A BsonSerializationContext.</returns>
             internal BsonSerializationContext Build()
             {
-                return new BsonSerializationContext(_writer, _isDynamicType);
+                return new BsonSerializationContext(Writer, IsDynamicType);
             }
         }
     }

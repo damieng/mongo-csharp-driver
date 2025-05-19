@@ -22,10 +22,6 @@ namespace MongoDB.Bson
     /// </summary>
     public struct BsonElement : IComparable<BsonElement>, IEquatable<BsonElement>
     {
-        // private fields
-        private readonly string _name;
-        private readonly BsonValue _value;
-
         // constructors
         // NOTE: for every public BsonElement constructor there is a matching constructor, Add and Set method in BsonDocument
 
@@ -45,26 +41,20 @@ namespace MongoDB.Bson
                 throw new ArgumentNullException("value");
             }
             ValidateElementName(name);
-            _name = name;
-            _value = value;
+            Name = name;
+            Value = value;
         }
 
         // public properties
         /// <summary>
         /// Gets the name of the element.
         /// </summary>
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
 
         /// <summary>
         /// Gets or sets the value of the element.
         /// </summary>
-        public BsonValue Value
-        {
-            get { return _value; }
-        }
+        public BsonValue Value { get; }
 
         // public operators
         /// <summary>
@@ -105,7 +95,7 @@ namespace MongoDB.Bson
         /// <returns>A shallow clone of the element.</returns>
         public BsonElement Clone()
         {
-            return new BsonElement(_name, _value);
+            return new BsonElement(Name, Value);
         }
 
         /// <summary>
@@ -114,7 +104,7 @@ namespace MongoDB.Bson
         /// <returns>A deep clone of the element.</returns>
         public BsonElement DeepClone()
         {
-            return new BsonElement(_name, _value.DeepClone());
+            return new BsonElement(Name, Value.DeepClone());
         }
 
         /// <summary>
@@ -124,9 +114,9 @@ namespace MongoDB.Bson
         /// <returns>A 32-bit signed integer that indicates whether this BsonElement is less than, equal to, or greather than the other.</returns>
         public int CompareTo(BsonElement other)
         {
-            int r = _name.CompareTo(other._name);
+            int r = Name.CompareTo(other.Name);
             if (r != 0) { return r; }
-            return _value.CompareTo(other._value);
+            return Value.CompareTo(other.Value);
         }
 
         /// <summary>
@@ -136,7 +126,7 @@ namespace MongoDB.Bson
         /// <returns>True if the two BsonElement values are equal.</returns>
         public bool Equals(BsonElement rhs)
         {
-            return _name == rhs._name && _value == rhs._value;
+            return Name == rhs.Name && Value == rhs.Value;
         }
 
         /// <summary>
@@ -158,8 +148,8 @@ namespace MongoDB.Bson
         {
             // see Effective Java by Joshua Bloch
             int hash = 17;
-            hash = 37 * hash + _name.GetHashCode();
-            hash = 37 * hash + _value.GetHashCode();
+            hash = 37 * hash + Name.GetHashCode();
+            hash = 37 * hash + Value.GetHashCode();
             return hash;
         }
 
@@ -169,7 +159,7 @@ namespace MongoDB.Bson
         /// <returns>A string representation of the value.</returns>
         public override string ToString()
         {
-            return string.Format("{0}={1}", _name, _value);
+            return string.Format("{0}={1}", Name, Value);
         }
     }
 }

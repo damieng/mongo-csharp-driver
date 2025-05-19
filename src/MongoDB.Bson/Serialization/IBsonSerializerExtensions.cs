@@ -14,6 +14,7 @@
 */
 
 using System;
+using System.Linq;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization.Conventions;
 
@@ -82,8 +83,18 @@ namespace MongoDB.Bson.Serialization
         public static void Serialize<TValue>(this IBsonSerializer<TValue> serializer, BsonSerializationContext context, TValue value)
         {
             var args = new BsonSerializationArgs { NominalType = serializer.ValueType };
+            if (context.SanitizeBsonValues && value is BsonValue bsonValue && s_sanitizedBsonTypes.Contains(bsonValue.BsonType))
+            {
+                serializer.Serialize(context, args, BsonString.Create("?"));
+                return;
+            }
             serializer.Serialize(context, args, value);
         }
+
+        private static readonly BsonType[] s_sanitizedBsonTypes =
+        [
+            BsonType.String, BsonType.Binary, BsonType.Boolean, BsonType.DateTime, BsonType.Decimal128, BsonType.Double, BsonType.Int32, BsonType.Int64, BsonType.ObjectId, BsonType.Timestamp
+        ];
 
         /// <summary>
         /// Converts a value to a BsonValue by serializing it.

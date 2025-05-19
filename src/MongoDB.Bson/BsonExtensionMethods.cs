@@ -192,6 +192,7 @@ namespace MongoDB.Bson
         /// <param name="serializer">The serializer.</param>
         /// <param name="configurator">The serialization context configurator.</param>
         /// <param name="args">The serialization args.</param>
+        /// <param name="sanitizeBsonValues">Whether to sanitize Bson values or not.</param>
         /// <returns>
         /// A JSON string.
         /// </returns>
@@ -200,10 +201,11 @@ namespace MongoDB.Bson
             JsonWriterSettings writerSettings = null,
             IBsonSerializer<TNominalType> serializer = null,
             Action<BsonSerializationContext.Builder> configurator = null,
-            BsonSerializationArgs args = default(BsonSerializationArgs))
+            BsonSerializationArgs args = default(BsonSerializationArgs),
+            bool sanitizeBsonValues = false)
         {
             args.SetOrValidateNominalType(typeof(TNominalType), "<TNominalType>");
-            return ToJson(obj, typeof(TNominalType), writerSettings, serializer, configurator, args);
+            return ToJson(obj, typeof(TNominalType), writerSettings, serializer, configurator, args, sanitizeBsonValues);
         }
 
         /// <summary>
@@ -215,6 +217,7 @@ namespace MongoDB.Bson
         /// <param name="serializer">The serializer.</param>
         /// <param name="configurator">The serialization context configurator.</param>
         /// <param name="args">The serialization args.</param>
+        /// <param name="sanitizeBsonValues">Whether to sanitize Bson values or not.</param>
         /// <returns>
         /// A JSON string.
         /// </returns>
@@ -226,7 +229,8 @@ namespace MongoDB.Bson
             JsonWriterSettings writerSettings = null,
             IBsonSerializer serializer = null,
             Action<BsonSerializationContext.Builder> configurator = null,
-            BsonSerializationArgs args = default(BsonSerializationArgs))
+            BsonSerializationArgs args = default(BsonSerializationArgs),
+            bool sanitizeBsonValues = false)
         {
             if (nominalType == null)
             {
@@ -249,6 +253,7 @@ namespace MongoDB.Bson
                 using (var bsonWriter = new JsonWriter(stringWriter, writerSettings ?? JsonWriterSettings.Defaults))
                 {
                     var context = BsonSerializationContext.CreateRoot(bsonWriter, configurator);
+                    context.SanitizeBsonValues = sanitizeBsonValues;
                     serializer.Serialize(context, args, obj);
                 }
                 return stringWriter.ToString();

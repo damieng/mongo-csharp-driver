@@ -20,9 +20,6 @@ namespace MongoDB.Bson.Serialization.Serializers
     /// </summary>
     public sealed class BsonValueSerializer : BsonValueSerializerBase<BsonValue>, IBsonArraySerializer, IBsonDocumentSerializer
     {
-        // private static fields
-        private static BsonValueSerializer __instance = new BsonValueSerializer();
-
         // constructors
         /// <summary>
         /// Initializes a new instance of the BsonValueSerializer class.
@@ -36,10 +33,7 @@ namespace MongoDB.Bson.Serialization.Serializers
         /// <summary>
         /// Gets an instance of the BsonValueSerializer class.
         /// </summary>
-        public static BsonValueSerializer Instance
-        {
-            get { return __instance; }
-        }
+        public static BsonValueSerializer Instance { get; } = new();
 
         // protected methods
         /// <summary>
