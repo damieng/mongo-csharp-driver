@@ -21,7 +21,6 @@ using FluentAssertions;
 using MongoDB.Bson.IO;
 using MongoDB.TestHelpers.XunitExtensions;
 using MongoDB.Driver.Core.Compression;
-using SharpCompress.IO;
 using Xunit;
 
 namespace MongoDB.Driver.Core.Tests.Core.Compression
@@ -103,7 +102,7 @@ namespace MongoDB.Driver.Core.Tests.Core.Compression
                     var result = string.Join(",", resultBytes);
                     result
                         .Should()
-                        .Be("120,156,74,76,74,78,73,77,75,207,200,204,202,206,201,205,203,47,40,44,42,46,41,45,43,175,168,172,50,48,52,50,54,49,53,51,183,176,84,72,164,150,34,0,0,0,0,255,255,3,0,228,159,39,197");
+                        .Be("120,156,75,76,74,78,73,77,75,207,200,204,202,206,201,205,203,47,40,44,42,46,41,45,43,175,168,172,50,48,52,50,54,49,53,51,183,176,84,72,164,150,34,0,228,159,39,197");
                 });
         }
 
@@ -122,7 +121,7 @@ namespace MongoDB.Driver.Core.Tests.Core.Compression
         public void Zlib_should_read_the_previously_written_message(CompressorType compressorType, int compressionOption)
         {
             var bytes = Encoding.ASCII.GetBytes(__testMessage);
-            int zlibHeaderSize = 21;
+            int zlibHeaderSize = 11;
 
             Assert(
                 bytes,
@@ -222,12 +221,8 @@ namespace MongoDB.Driver.Core.Tests.Core.Compression
             {
                 var memoryStream = new MemoryStream();
                 var byteBufferStream = new ByteBufferStream(buffer);
-                using (new NonDisposingStream(memoryStream))
-                using (new NonDisposingStream(byteBufferStream))
-                {
-                    test(byteBufferStream, memoryStream);
-                    assertResult?.Invoke(byteBufferStream, memoryStream);
-                }
+                test(byteBufferStream, memoryStream);
+                assertResult?.Invoke(byteBufferStream, memoryStream);
             }
         }
 
