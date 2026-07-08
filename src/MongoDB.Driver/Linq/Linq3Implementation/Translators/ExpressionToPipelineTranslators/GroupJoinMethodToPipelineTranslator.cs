@@ -57,7 +57,8 @@ namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToPipeli
                 var wrappedOuterSerializer = WrappedValueSerializer.Create("_outer", outerSerializer);
 
                 var innerExpression = arguments[1];
-                var (innerCollectionName, innerSerializer) = innerExpression.GetCollectionInfoFromQueryable(containerExpression: expression);
+                var (innerCollectionName, innerSerializer, innerFilterPipeline) =
+                    JoinTranslationHelper.ResolveInner(context, expression, innerExpression);
 
                 var outerKeySelectorLambda = ExpressionHelper.UnquoteLambda(arguments[2]);
                 var localField = outerKeySelectorLambda.TranslateToDottedFieldName(context, wrappedOuterSerializer);
@@ -65,11 +66,9 @@ namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToPipeli
                 var innerKeySelectorLambda = ExpressionHelper.UnquoteLambda(arguments[3]);
                 var foreignField = innerKeySelectorLambda.TranslateToDottedFieldName(context, innerSerializer);
 
-                var lookupStage = AstStage.Lookup(
-                    from: innerCollectionName,
-                    localField,
-                    foreignField,
-                    @as: "_inner");
+                // Unlike Join/LeftJoin, GroupJoin keeps _inner as an array (no $unwind); a global cardinality
+                // operator in the inner subquery still applies before the join thanks to the shared lookup logic.
+                var lookupStage = JoinTranslationHelper.CreateLookupStage(innerCollectionName, localField, foreignField, innerFilterPipeline);
 
                 var resultSelectorLambda = ExpressionHelper.UnquoteLambda(arguments[4]);
                 var outerParameter = resultSelectorLambda.Parameters[0];
