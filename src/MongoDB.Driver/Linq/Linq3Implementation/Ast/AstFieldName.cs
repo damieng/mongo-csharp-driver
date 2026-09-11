@@ -20,10 +20,10 @@ namespace MongoDB.Driver.Linq.Linq3Implementation.Ast
         // a field name is emitted into the pipeline verbatim and cannot be quoted, so it is only safe when the
         // server treats it as an ordinary field name. a name that starts with "$" is interpreted as an operator
         // when it is the first element name of a document, a name that contains "." is interpreted as a path to
-        // a nested field, and an empty name is rejected outright.
+        // a nested field, and a null or empty name is rejected outright.
         public static bool IsSafe(string name)
         {
-            return name.Length > 0 && name[0] != '$' && name.IndexOf('.') < 0;
+            return name != null && name.Length > 0 && name[0] != '$' && name.IndexOf('.') < 0;
         }
     }
 }

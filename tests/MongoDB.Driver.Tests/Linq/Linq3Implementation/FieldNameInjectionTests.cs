@@ -34,6 +34,7 @@ public class FieldNameInjectionTests : LinqIntegrationTest<FieldNameInjectionTes
     }
 
     [Theory]
+    [InlineData(null)]
     [InlineData("$toUpper")]
     [InlineData("a.b")]
     [InlineData("")]
